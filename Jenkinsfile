@@ -1,44 +1,18 @@
-pipeline {
-    agent any
-    stages {    
-        stage('Test') {
-            steps {
-                sh 'echo "Fail!"'
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'echo "Hello World"'
-                sh '''
-                    echo "Multiline shell steps works too"
-                    ls -lah
-                '''
-            }
-        }
-        stage('git1') {
-            steps {
-                sh 'echo "git1"'
-            }
-         }
+node {
+  stage("Clone the project") {
+    git branch: 'main', url: 'https://github.com/MoMo-Max/demo1.git'
+  }
+
+  stage("Compilation") {
+    sh "./mvnw clean install -DskipTests"
+  }
+
+  stage("Tests and Deployment") {
+    stage("Runing unit tests") {
+      sh "./mvnw test -Punit"
     }
-        
-    
-    post {
-        always {
-            echo 'This will always run'
-        }
-        success {
-            echo 'This will run only if successful'
-        }
-        failure {
-            echo 'This will run only if failed'
-        }
-        unstable {
-            echo 'This will run only if the run was marked as unstable'
-        }
-        changed {
-            echo 'This will run only if the state of the Pipeline has changed'
-            echo 'For example, if the Pipeline was previously failing but is now successful'
-        }
+    stage("Deployment") {
+      sh 'nohup ./mvnw spring-boot:run -Dserver.port=8001 &'
     }
+  }
 }

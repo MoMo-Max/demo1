@@ -17,7 +17,7 @@ pipeline {
         }
         stage('git1') {
             steps {
-                sh 'git1"'
+                sh 'echo "git1"'
             }
          }
     }
